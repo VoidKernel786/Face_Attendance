@@ -1,19 +1,19 @@
 import sys
 import cv2
-import numpy as np
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QWidget
-
-from start_window import Ui_Form
+from New_User_Window import Ui_Form as new_User_Window
+from start_window import Ui_Form as StartWindowUi
 
 class Window(QWidget):
 	def __init__(self):
 		super().__init__()
 
 		# load the ui
-		self.ui = Ui_Form()
+		self.ui = StartWindowUi()
 		self.ui.setupUi(self)
+		self.setWindowTitle("Login")
 
 		# open the webcam
 		self.capture = cv2.VideoCapture(0)
@@ -63,17 +63,27 @@ class Window(QWidget):
 		ret, frame = self.capture.read()
 
 		if ret:
-			# in future we need to be able use this with face recognition to find the user and delete this pic so it does not take tooo much storage everytime anyone tries to login....
+			# in the future, we need to be able use this with face recognition to find the user and delete this pic so it does not take tooo much storage everytime anyone tries to log in....
 			cv2.imwrite("CapturedPic.jpg", frame)
 			print("Photo Captured!")
 	def new_user(self):
-		print("Feature upcommming!!!")
+		self.new_user_window = NewUserWindow()
+		self.new_user_window.show()
+
 	def closeEvent(self, event):
 		# stop timer
 		self.timer.stop()
 		# release the webcam
 		self.capture.release()
 		event.accept()
+
+class NewUserWindow(QWidget):
+	def __init__(self):
+		super().__init__()
+
+		self.ui = new_User_Window()
+		self.ui.setupUi(self)
+		self.setWindowTitle("Login")
 
 
 app = QApplication(sys.argv)
