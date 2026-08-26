@@ -67,7 +67,10 @@ class Window(QWidget):
 			cv2.imwrite("CapturedPic.jpg", frame)
 			print("Photo Captured!")
 	def new_user(self):
-		self.new_user_window = NewUserWindow()
+		ret, frame = self.capture.read()
+		if not ret:
+			return
+		self.new_user_window = NewUserWindow(frame)
 		self.new_user_window.show()
 
 	def closeEvent(self, event):
@@ -78,12 +81,35 @@ class Window(QWidget):
 		event.accept()
 
 class NewUserWindow(QWidget):
-	def __init__(self):
+	def __init__(self, frame):
 		super().__init__()
 
 		self.ui = new_User_Window()
 		self.ui.setupUi(self)
-		self.setWindowTitle("Login")
+		self.setWindowTitle("Register New User")
+
+		self.pic = frame
+
+		success, buffer = cv2.imencode(".jpg", frame)
+		if not success:
+			self.ui.pic_label.setText("Could Not Load Image...")
+		else:
+			image = QImage.fromData(buffer.tobytes())
+			pixmap = QPixmap.fromImage(image)
+			pixmap = pixmap.scaled(
+				self.ui.pic_label.size(),
+				Qt.AspectRatioMode.KeepAspectRatio,
+				Qt.TransformationMode.SmoothTransformation
+			)
+			self.ui.pic_label.setPixmap(pixmap)
+
+		self.ui.accept_button.clicked.connect(self.accept_reg_new_user)
+		self.ui.pushButton_2.clicked.connect(self.close)
+
+	def accept_reg_new_user(self):
+		username = self.ui.username_textEdit.toPlainText()
+		cv2.imwrite(f"{username}.jpg", self.pic) # Right now, the file is stored just right here.. in the future we need it to specifically be stored in a place where the face recognition can access it
+		print("photo captured")
 
 
 app = QApplication(sys.argv)
