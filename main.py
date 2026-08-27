@@ -1,3 +1,5 @@
+import datetime
+import subprocess
 import sys
 import cv2
 import os
@@ -25,8 +27,11 @@ class Window(QWidget):
 		self.timer.start(30)
 
 		# connect the buttons
-		self.ui.login_button.clicked.connect(self.take_photo)
+		self.ui.login_button.clicked.connect(self.login)
 		self.ui.new_user_button.clicked.connect(self.new_user)
+
+		# Creating a variable to hold the path to the log file to store attendance
+		self.log_path = './.log.txt'
 
 	def process_webcam(self):
 		# try capture the image from the webcam
@@ -60,13 +65,26 @@ class Window(QWidget):
 		# - setting the image
 		self.ui.webcam_label.setPixmap(pixmap)
 
-	def take_photo(self):
+	def login(self):
 		ret, frame = self.capture.read()
+		if not ret:
+			return
+		unknown_img_path = './.temp.jpg'
+		cv2.imwrite(unknown_img_path, frame)
 
-		if ret:
-			# in the future, we need to be able use this with face recognition to find the user and delete this pic so it does not take tooo much storage everytime anyone tries to log in....
-			cv2.imwrite("CapturedPic.jpg", frame)
-			print("Photo Captured!")
+		output = str(subprocess.check_output(['face_recognition', './db', unknown_img_path], creationflags=subprocess.CREATE_NO_WINDOW))
+		os.remove(unknown_img_path)
+		name = output.split(',')[1][:-5]
+		if name == 'no_persons_found':
+			QMessageBox.warning(self, "Error", "No Face Found.\n\nTry a clearer photo maby?")
+		elif name == 'unknown_person':
+			QMessageBox.warning(self, "Error", "Unknown User\n\nPls register if you are a new user and try again :)")
+		else:
+			QMessageBox.information(self, "Welcome Buddy!!", "Welcome {}. \nWhat a pleasant day it is?".format(name))
+			with open(self.log_path, "a") as f:
+				f.write("{},{}\n" .format(name, datetime.datetime.now()))
+				f.close()
+
 	def new_user(self):
 		ret, frame = self.capture.read()
 		if not ret:
