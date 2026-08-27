@@ -1,5 +1,6 @@
 import sys
 import cv2
+import os
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QApplication, QWidget
@@ -103,12 +104,16 @@ class NewUserWindow(QWidget):
 			)
 			self.ui.pic_label.setPixmap(pixmap)
 
+		self.dir_db = './db'
+		if not os.path.exists(self.dir_db):
+			os.mkdir(self.dir_db)
+
 		self.ui.accept_button.clicked.connect(self.accept_reg_new_user)
 		self.ui.pushButton_2.clicked.connect(self.close)
 
 	def accept_reg_new_user(self):
 		username = self.ui.username_textEdit.toPlainText()
-		cv2.imwrite(f"{username}.jpg", self.pic) # Right now, the file is stored just right here.. in the future we need it to specifically be stored in a place where the face recognition can access it
+		cv2.imwrite(os.path.join(self.dir_db, "{}.jpg" .format(username)), self.pic)
 		print("photo captured")
 
 
