@@ -3,7 +3,7 @@ import cv2
 import os
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QMessageBox
 from New_User_Window import Ui_Form as new_User_Window
 from start_window import Ui_Form as StartWindowUi
 
@@ -114,7 +114,8 @@ class NewUserWindow(QWidget):
 	def accept_reg_new_user(self):
 		username = self.ui.username_textEdit.toPlainText()
 		cv2.imwrite(os.path.join(self.dir_db, "{}.jpg" .format(username)), self.pic)
-		print("photo captured")
+		QMessageBox.information(self, "Success", "New User has been Registered!!!!")
+		self.close()
 
 
 app = QApplication(sys.argv)
